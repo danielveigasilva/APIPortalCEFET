@@ -1,7 +1,8 @@
+#Daniel Veiga
 
 #cookie = s.cookies.get_dict()
 
-#print(cookie['JSESSIONID'])//teste
+#print(cookie['JSESSIONID'])
 
 from requests import Session
 from bs4 import BeautifulSoup as bs
