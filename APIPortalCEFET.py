@@ -3,27 +3,47 @@
 #cookie = s.cookies.get_dict()
 
 #print(cookie['JSESSIONID'])
+from flask import Flask, jsonify, request
+import urllib.request      
+import html
 
 from requests import Session
 from bs4 import BeautifulSoup as bs
 import json
 
-s = Session()
+app = Flask(__name__)
+sessao = Session()
 
-s.headers.update({'referer': 'https://alunos.cefet-rj.br/matricula/'})
-s.get("https://alunos.cefet-rj.br/aluno/login.action?error=")
+def login(usuario,senha):
 
-#bs_content = bs(site.content, "html.parser")
+    sessao.headers.update({'referer': 'https://alunos.cefet-rj.br/aluno/login.action?error='})
+    sessao.get("https://alunos.cefet-rj.br/aluno/login.action?error=")
 
-login_data = {"j_username":"matricula","j_password":"senha"}
+    dados_login = {"j_username":usuario,"j_password":senha}
 
-sitePost = s.post("https://alunos.cefet-rj.br/aluno/j_security_check",data = login_data)
+    sitePost = sessao.post("https://alunos.cefet-rj.br/aluno/j_security_check",data = dados_login)
+    siteConteudo = bs(sitePost.content, "html.parser")
 
-siteGet = s.get("https://alunos.cefet-rj.br/aluno/index.action")
+    siteMatricula = siteConteudo.find('input', id='matricula')['value']
 
-siteConteudo = bs(sitePost.content, "html.parser")
-siteMatricula = siteConteudo.find('input', id='matricula')['value']
-print(siteMatricula)
+    return siteMatricula
+
+@app.route('/dados/', methods=['GET'])
+def dados():
+
+    usuario = request.args.get('usuario')
+    senha = request.args.get('senha')
+
+    siteMatricula = login(usuario,senha)
+
+    site = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/relatorio/relatorios.action?matricula="+siteMatricula)
+
+    print(site.content)
+
+if __name__ == "__main__":
+    app.run(debug=True)
+
+#http://127.0.0.1:5000/
 
 #------------------------LINKS-------------------------
 
