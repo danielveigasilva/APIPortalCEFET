@@ -72,9 +72,9 @@ def login():
     sitePost = sessao.post("https://alunos.cefet-rj.br/aluno/j_security_check",data = dados_login)
     sitePostBS = bs(sitePost.content, "html.parser")
 
-    #Matricula = sitePostBS.find('input', id='matricula')['value']
+    Matricula = sitePostBS.find("input", id="matricula")["value"]
     Cookie = sessao.cookies.get_dict()
-    return jsonify({"site": str(sitePostBS.contents)})
+    return jsonify({"site": str(sitePostBS.contents), "matri": Matricula})
     #return jsonify({
     #                    "autenticacao":{
     #                        "matricula": Matricula,
