@@ -72,20 +72,20 @@ def login():
     sitePost = sessao.post("https://alunos.cefet-rj.br/aluno/j_security_check",data = dados_login)
     sitePostBS = bs(sitePost.content, "html.parser")
 
-    Matricula = sitePostBS.find('input', id='matricula')['value']
+    #Matricula = sitePostBS.find('input', id='matricula')['value']
     Cookie = sessao.cookies.get_dict()
-
-    return jsonify({
-                        "autenticacao":{
-                            "matricula": Matricula,
-                            "cookie": Cookie['JSESSIONID']
-                        }
-                    })
+    return jsonify({"site": sitePostBS.contents})
+    #return jsonify({
+    #                    "autenticacao":{
+    #                        "matricula": Matricula,
+    #                        "cookie": Cookie['JSESSIONID']
+    #                    }
+    #                })
 
 if __name__ == "__main__":
-    #app.run(debug=True)
-    port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    app.run(debug=True)
+    #port = int(os.environ.get('PORT', 5000))
+    #app.run(debug=True, host='0.0.0.0', port=port)
 
 #http://127.0.0.1:5000/
 
