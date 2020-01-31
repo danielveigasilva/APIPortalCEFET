@@ -1,1 +1,1 @@
-web: python APIPortalCEFET.py
+web: python web.py
