@@ -23,22 +23,25 @@ def normalizacao(texto):
 
 @app.route('/horarios/', methods=['GET'])
 def horarios():
-    cookie = request.args.get('cookie')
-    matricula = request.args.get('matricula')
     
-    sessao.cookies.set("JSESSIONID", cookie)
-    siteHorarios = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/quadrohorario/menu.action?matricula=" + matricula)
-    siteHorariosBS = bs(siteHorarios.content, "html.parser")
+    #sessao = Session()
+    #cookie = request.args.get('cookie')
+    #matricula = request.args.get('matricula')
+    
+    #sessao.cookies.set("JSESSIONID", cookie)
+    #siteHorarios = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/quadrohorario/menu.action?matricula=" + matricula)
+    #siteHorariosBS = bs(siteHorarios.content, "html.parser")
 
-    HorariosLink = siteHorariosBS.find('link', {'rel':'stylesheet'})['href']
+    #HorariosLink = siteHorariosBS.find('link', {'rel':'stylesheet'})['href']
 
-    return jsonify({"HorariosLink":HorariosLink})
+    return jsonify({"retorno":"Não Implementado!"})
 
 
 
 @app.route('/listaRelatorios/', methods=['GET'])
 def lista_relatorios():
-
+    
+    sessao = Session()
     cookie = request.args.get('cookie')
     matricula = request.args.get('matricula')
     
@@ -61,10 +64,11 @@ def lista_relatorios():
 @app.route('/autenticacao/', methods=['GET'])
 def login():
 
+    sessao = Session()
     usuario = request.args.get('usuario')
     senha = request.args.get('senha')
 
-    sessao.headers.update({'referer': 'https://alunos.cefet-rj.br/aluno/login.action?error='})
+    sessao.headers.update({'referer': 'https://alunos.cefet-rj.br/matricula/'})
     sessao.get("https://alunos.cefet-rj.br/aluno/login.action?error=")
 
     dados_login = {"j_username":usuario,"j_password":senha}
@@ -72,19 +76,15 @@ def login():
     sitePost = sessao.post("https://alunos.cefet-rj.br/aluno/j_security_check",data = dados_login)
     sitePostBS = bs(sitePost.content, "html.parser")
 
-    try:
-        Matricula = sitePostBS.find("input", id="matricula")["value"]
-    except:
-        Matricula = 0
-    
+    Matricula = sitePostBS.find("input", id="matricula")["value"]
     Cookie = sessao.cookies.get_dict()
-    return jsonify({"site": str(sitePostBS.contents), "matri": Matricula})
-    #return jsonify({
-    #                    "autenticacao":{
-    #                        "matricula": Matricula,
-    #                        "cookie": Cookie['JSESSIONID']
-    #                    }
-    #                })
+
+    return jsonify({
+                        "autenticacao":{
+                            "matricula": Matricula,
+                            "cookie": Cookie['JSESSIONID']
+                        }
+                    })
 
 if __name__ == "__main__":
     #app.run(debug=True)
