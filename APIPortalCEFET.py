@@ -2,12 +2,14 @@
 #data.append({'f':var})
 #cookie = s.cookies.get_dict()
 #return send_file("teste.pdf", attachment_filename='teste.pdf')
+#pip freeze > requirements.txt
 
 #print(cookie['JSESSIONID'])
 from flask import Flask, jsonify, request, send_file
 import urllib.request      
 import html
 import unicodedata
+import os
 
 from requests import Session
 from bs4 import BeautifulSoup as bs
@@ -29,7 +31,6 @@ def horarios():
     siteHorariosBS = bs(siteHorarios.content, "html.parser")
 
     HorariosLink = siteHorariosBS.find('link', {'rel':'stylesheet'})['href']
-    sessao.get("https://alunos.cefet-rj.br/aluno/" + HorariosLink)
 
     return jsonify({"HorariosLink":HorariosLink})
 
@@ -82,7 +83,9 @@ def login():
                     })
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    #app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=True, host='0.0.0.0', port=port)
 
 #http://127.0.0.1:5000/
 
