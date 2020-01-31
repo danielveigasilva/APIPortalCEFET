@@ -74,7 +74,7 @@ def login():
 
     #Matricula = sitePostBS.find('input', id='matricula')['value']
     Cookie = sessao.cookies.get_dict()
-    return jsonify({"site": sitePostBS.contents})
+    return jsonify({"site": str(sitePostBS.contents)})
     #return jsonify({
     #                    "autenticacao":{
     #                        "matricula": Matricula,
