@@ -4,18 +4,39 @@
     API desenvolvida em linguagem Python para interação web com o portal online da instituição federal Centro Federal de Educação Tecnológica Celso Suckow da Fonseca (CEFET/RJ).
 </p>
 
-### Objetivo
-Este projeto tem por objetivo fomentar o desenvolvimento de aplicações que visam facilitar o acesso a informações referentes ao portal online de docentes e dicentes da instituição.
 
-### O que é?
+## Sobre
 
 Application Programming Interface (API) é um conjunto de padrões de programação que permite acesso a um serviço em expecífico. Em resumo, é uma camada intermediária que promove a interação de uma aplicação com o serviço desejado, neste caso o [portal do aluno CEFET/RJ](https://alunos.cefet-rj.br/aluno/).
 
-### Utilização
+## Objetivo
+
+Este projeto tem por objetivo fomentar o desenvolvimento de aplicações que visam facilitar o acesso a informações referentes ao portal online de docentes e dicentes da instituição.
+
+## Desenvolvimento
+
+Este projeto ainda está em desenvolvimento, novas funcionalidades estão sendo adicionadas constantemente. Abaixo segue o andamento das implementações:
+- **Autenticação**
+    
+    :heavy_check_mark: autenticacao
+- **Relatórios**
+    
+    :heavy_check_mark: listaRelatorios
+    
+    :heavy_check_mark: geraRelatorio
+- **Perfil**
+    
+    :warning: perfilDados *[BETA]*
+    
+    :heavy_check_mark: perfilDadosGerais
+    
+    :heavy_check_mark: perfilFoto
+
+## Utilização
 
 Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pode ser acessada através da URL: [https://api-portal-cefet.herokuapp.com/](https://api-portal-cefet.herokuapp.com/).
 
-#### Funções
+### Funções
 
 1. **Autenticação**
     - **autenticacao (usuario , senha)**
@@ -130,7 +151,7 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
         
      - **perfilFoto (cookie)**
     
-        Esta função é responsável por obter o foto de perfil cadastrada no portal. Deve seguir o padrão abaixo para sua execução:
+        Esta função é responsável por obter a foto de perfil cadastrada no portal. Deve seguir o padrão abaixo para sua execução:
         ```url
         https://api-portal-cefet.herokuapp.com/perfilFoto/?cookie=COOKIE_AUTENTICADO_AQUI
         ```
