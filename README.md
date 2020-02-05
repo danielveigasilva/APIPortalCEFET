@@ -1,5 +1,7 @@
-# APIPortalCEFET
-API desenvolvida em linguagem Python para interação web com o portal online da instituição federal Centro Federal de Educação Tecnológica Celso Suckow da Fonseca (CEFET/RJ). 
+![logo](/imagens/logo.PNG)
+<p align="center">
+    API desenvolvida em linguagem Python para interação web com o portal online da instituição federal Centro Federal de Educação Tecnológica Celso Suckow da Fonseca (CEFET/RJ).
+</p>
 
 ## Sobre
 
