@@ -1,5 +1,6 @@
-![logo](/imagens/logo.PNG)
 <p align="center">
+    <img src="/imagens/logo.PNG" width="80%">
+    <br></br>
     API desenvolvida em linguagem Python para interação web com o portal online da instituição federal Centro Federal de Educação Tecnológica Celso Suckow da Fonseca (CEFET/RJ).
 </p>
 
