@@ -16,13 +16,13 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
 
 #### Funções
 
-1. **Autenticação (usuário , senha)**
+1. **autenticacao (usuário , senha)**
     
     Esta função é responsável por autenticar uma nova sessão no portal. Deve seguir o padrão abaixo para sua execução:
     ```url
     https://api-portal-cefet.herokuapp.com/autenticacao/?usuario=SUA_MATRICULA_AQUI&senha=SUA_SENHA_AQUI
     ```
-    Se o login occorer corretamente o retorno será um json contendo um Cookie e uma Matrícula interna do site (**Atenação: a matrícula retornada não está ligada a matrícula acadêmica, se trata de um novo dado usado internamente pelo portal**).
+    Se o login occorer corretamente o retorno será um json contendo um *Cookie* e uma *Matrícula* interna do site (**Atenção: a matrícula retornada não está ligada a matrícula acadêmica, se trata de um novo dado usado internamente pelo portal**).
     
     Exemplo de json de retorno:
     ```json
@@ -32,5 +32,30 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
         "matricula":"123456"
         }
     }
+    ```
+
+2. **listaRelatorios (cookie , matricula)**
+    
+    Esta função é responsável por listar os relatórios disponíveis para o seu perfil. Deve seguir o padrão abaixo para sua execução:
+    ```url
+    https://api-portal-cefet.herokuapp.com/listaRelatorios/?cookie=COOKIE_AUTENTICADO_AQUI&matricula=MATRICULA_INTERNA_AQUI
+    ```
+    Se o cookie e a matrícula forem válidos o retorno será um json contendo o código 200 e uma lista de relatórios contendo *ID*, *Nome* e *Link*.
+    
+    Exemplo de json de retorno:
+    ```json
+    {
+        "codigo":"200",
+        "relatorios":[
+            {
+                "id":0,
+                "link":"atestadoTrancamento.action?matricula=123456",
+                "nome":"Atestado Trancamento"},
+            {
+                "id":1,
+                "link":"boletimEscolar.action?matricula=123456",
+                "nome":"Boletim Escolar"
+            }]
+     }
     ```
 
