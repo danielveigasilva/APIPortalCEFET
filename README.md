@@ -19,13 +19,13 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
 1. **Autenticação (usuário , senha)**
     
     Esta função é responsável por autenticar uma nova sessão no portal. Deve seguir o padrão abaixo para sua execução:
-    ```
+    ```url
     https://api-portal-cefet.herokuapp.com/autenticacao/?usuario=SUA_MATRICULA_AQUI&senha=SUA_SENHA_AQUI
     ```
     Se o login occorer corretamente o retorno será um json contendo um Cookie e uma Matrícula interna do site (**Atenação: a matrícula retornada não está ligada a matrícula acadêmica, se trata de um novo dado usado internamente pelo portal**).
     
     Exemplo de json de retorno:
-    ```
+    ```json
     {
         "autenticacao":{
         "cookie":"B60E98A57D71D7BBEB80457A125436478",
