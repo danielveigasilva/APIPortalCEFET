@@ -15,7 +15,7 @@ app = Flask(__name__)
 sessao = Session()
 
 def normalizacao(texto):
-    return unicodedata.normalize('NFKD', texto).encode('ASCII', 'ignore').decode('ASCII').replace('  ','').replace('\n','')
+    return unicodedata.normalize('NFKD', texto).encode('ASCII', 'ignore').decode('ASCII').replace('  ','').replace('\n','').replace('\r','')
 
 def pegaPropriedadePerfil(conteudoHTML, propriedade):
     
@@ -73,21 +73,62 @@ def perfilFoto():
                         "msg":"Cookie invalido"
                     })
 
+@app.route('/perfilDadosGerais/', methods=['GET'])
+def perfilDadosGerais(): #TODO: finalizar coleta de dados
+
+    sessao = Session()
+
+    cookie = request.args.get('cookie')
+    matricula = request.args.get('matricula')
+
+    if (Autenticado(cookie)):
+
+        sessao.cookies.set("JSESSIONID", cookie)
+        siteHorarios = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/quadrohorario/menu.action?matricula=" + matricula)
+        sitePerfil = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/perfil/perfil.action")
+
+        sessao = Session()
+        
+        return jsonify({
+                        "codigo":"200",
+                        "informacoes":{
+                            "Matricula":        pegaPropriedadePerfil(siteHorarios.content, '.Matrícula:'),
+                            "Curso":            pegaPropriedadePerfil(siteHorarios.content, '.Curso:'),
+                            "Periodo Atual":    pegaPropriedadePerfil(siteHorarios.content, '.Período Atual:'),
+                            "Nome":             pegaPropriedadePerfil(sitePerfil.content, '.Nome')
+                        }
+                    })
+    else:
+        return jsonify({
+                        "codigo":"400",
+                        "msg":"Cookie invalido"
+                    })
+
+
+        
+
 @app.route('/perfilDados/', methods=['GET'])
 def perfilDados(): #TODO: finalizar coleta de dados
 
     sessao = Session()
 
     cookie = request.args.get('cookie')
+    matricula = request.args.get('matricula')
     sessao.cookies.set("JSESSIONID", cookie)
 
     if (Autenticado(cookie)):
 
+        siteHorarios = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/quadrohorario/menu.action?matricula=" + matricula)
         sitePerfil = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/perfil/perfil.action")
         sessao = Session()
 
         return jsonify({
                         "codigo":"200",
+                        "academico":{
+                            "Matricula":        pegaPropriedadePerfil(siteHorarios.content, '.Matrícula:'),
+                            "Curso":            pegaPropriedadePerfil(siteHorarios.content, '.Curso:'),
+                            "Periodo Atual":    pegaPropriedadePerfil(siteHorarios.content, '.Período Atual:')
+                        },
                         "informacoes":{
                             "Nome":             pegaPropriedadePerfil(sitePerfil.content, '.Nome'),
                             "Nome da Mae":      pegaPropriedadePerfil(sitePerfil.content, '.Nome da Mãe'),
@@ -99,7 +140,7 @@ def perfilDados(): #TODO: finalizar coleta de dados
                             "Tipo Sanguineo":   pegaPropriedadePerfil(sitePerfil.content, '.Tipo Sanguíneo'),
                             "Fator RH":         pegaPropriedadePerfil(sitePerfil.content, '.Fator RH'),
                             "Estado Civil":     pegaPropriedadePerfil(sitePerfil.content, '.Estado Civil'),
-                            "E-mail":           pegaPropriedadePerfil(sitePerfil.content, '.Página Pessoal'),
+                            "Pagina Pessoal":   pegaPropriedadePerfil(sitePerfil.content, '.Página Pessoal'),
                             "Nacionalidade":    pegaPropriedadePerfil(sitePerfil.content, '.Nacionalidade'),
                             "Estado":           pegaPropriedadePerfil(sitePerfil.content, '.Estado'), #TODO: consertar bug, Estado obtem Estado Civil
                             "Naturalidade":     pegaPropriedadePerfil(sitePerfil.content, '.Naturalidade')
@@ -132,30 +173,65 @@ def perfilDados(): #TODO: finalizar coleta de dados
 
 @app.route('/horarios/', methods=['GET'])
 def horarios():
-    
-    #sessao = Session()
+    '''
+    sessao = Session()
 
-    #cookie = request.args.get('cookie')
-    #matricula = request.args.get('matricula')
-    
-    #sessao.cookies.set("JSESSIONID", cookie)
-    #siteHorarios = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/quadrohorario/menu.action?matricula=" + matricula)
-    #siteHorariosBS = bs(siteHorarios.content, "html.parser")
+    cookie = request.args.get('cookie')
+    matricula = request.args.get('matricula')
 
-    #HorariosTabela = siteHorariosBS.find('div', {'id':'quadrohorario'})
-
-    #TrLinhas = HorariosTabela.find_all('tr')
-
-    #for itemTrLinhas in TrLinhas:
+    if (Autenticado(cookie)):
         
-    #    TdCelula = TrLinhas.find_all('td')
+    sessao.cookies.set("JSESSIONID", cookie)
+    
+    siteHorarios = sessao.get("https://alunos.cefet-rj.br/aluno/ajax/aluno/quadrohorario/quadrohorario.action?matricula=" + matricula)
+    siteHorariosBS = bs(siteHorarios.content, "html.parser")
+
+    HorariosLinhas = siteHorariosBS.find(id = 'quadrohorario').find_all('tr')
+
+    HorariosLinhasTratado = str(HorariosLinhas).replace("</div></td></div></td></div></td></div></td></div></td></div></td></tr>",'')
+
+    HorariosLinhasTratadoBS = bs(HorariosLinhasTratado, "html.parser")
+
+    print(HorariosLinhas)
+
+    Horarios = []
+
+    for linha in HorariosLinhas:
+        HorariosCelulas = linha.find_all('td')
+
+        horario = {}
+        horario['intervalo'] = normalizacao(HorariosCelulas[0].get_text())
+        print("-------------------------------------------")
+        print(HorariosCelulas[0])
+        print("-------------------------------------------")
+
+        dias = {}
+        dias['Dom'] = normalizacao(HorariosCelulas[1].get_text())
+        dias['Seg'] = normalizacao(HorariosCelulas[2].get_text())
+        dias['Ter'] = normalizacao(HorariosCelulas[3].get_text())
+        dias['Qua'] = normalizacao(HorariosCelulas[4].get_text())
+        dias['Qui'] = normalizacao(HorariosCelulas[5].get_text())
+        dias['Sex'] = normalizacao(HorariosCelulas[6].get_text())
+        dias['Sab'] = normalizacao(HorariosCelulas[7].get_text())
+
+        horario['dias'] = dias
+
+        Horarios.append(horario)
+
+    return jsonify({"horarios":Horarios})
+
+    TrLinhas = HorariosTabela.find_all('tr')
+
+    for itemTrLinhas in TrLinhas:
         
-    #    for itemCelula in TdCelula:
-    #        celula = itemCelula.find('a')
-    #        print(celula.text)
+        TdCelula = TrLinhas.find_all('td')
+        
+        for itemCelula in TdCelula:
+            celula = itemCelula.find('a')
+            print(celula.text)
 
-    #sessao = Session()
-
+    sessao = Session()
+'''
     return jsonify({"retorno":"Nao Implementado!"})
 
 
@@ -262,7 +338,7 @@ if __name__ == "__main__":
 
 #------------------------LINKS-------------------------
 
-#Perfil         - https://alunos.cefet-rj.br/aluno/aluno/perfil/perfil.action
+#OK - Perfil         - https://alunos.cefet-rj.br/aluno/aluno/perfil/perfil.action
 #AlterarSenha   - https://alunos.cefet-rj.br/usuario/usuario/usuario.action?br.com.asten.si.geral.web.spring.interceptors.AplicacaoWebChangeInterceptor.aplicacaoWeb=1
 #Matricula      - https://alunos.cefet-rj.br/aluno/aluno/matricula/solicitacoes.action?matricula=           +  siteMatricula
 #OK - Relatorio      - https://alunos.cefet-rj.br/aluno/aluno/relatorio/relatorios.action?matricula=             +  siteMatricula
