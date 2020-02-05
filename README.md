@@ -3,8 +3,6 @@
     API desenvolvida em linguagem Python para interação web com o portal online da instituição federal Centro Federal de Educação Tecnológica Celso Suckow da Fonseca (CEFET/RJ).
 </p>
 
-## Sobre
-
 ### Objetivo
 Este projeto tem por objetivo fomentar o desenvolvimento de aplicações que visam facilitar o acesso a informações referentes ao portal online de docentes e dicentes da instituição.
 
