@@ -43,7 +43,7 @@ def Autenticado(cookie):
         return True
 
 
-@app.route('/perfilFoto', methods=['GET'])
+@app.route('/perfil/foto', methods=['GET'])
 def perfilFoto():
     sessao = Session()
 
@@ -69,7 +69,7 @@ def perfilFoto():
     )
 
 
-@app.route('/perfilDadosGerais', methods=['GET'])
+@app.route('/perfil/dados', methods=['GET'])
 def perfilDadosGerais():  # TODO: finalizar coleta de dados
 
     sessao = Session()
@@ -99,7 +99,7 @@ def perfilDadosGerais():  # TODO: finalizar coleta de dados
     })
 
 
-@app.route('/perfilDados', methods=['GET'])
+@app.route('/perfil/dados/todos', methods=['GET'])
 def perfilDados():  # TODO: finalizar coleta de dados
 
     sessao = Session()
@@ -235,7 +235,7 @@ def horarios():
     })
 
 
-@app.route('/geraRelatorio', methods=['GET'])
+@app.route('/relatorio', methods=['GET'])
 def geraRelatorio():
     sessao = Session()
 
@@ -263,8 +263,8 @@ def geraRelatorio():
     )
 
 
-@app.route('/listaRelatorios', methods=['GET'])
-def lista_relatorios():
+@app.route('/relatorios', methods=['GET'])
+def listaRelatorios():
     sessao = Session()
 
     cookie = request.args.get('cookie')
