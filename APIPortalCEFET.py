@@ -53,7 +53,6 @@ def Autenticado(cookie):
     sessao.headers.update({'referer': URLS['matricula']})
 
     acesso = sessao.get(URLS['index_action'], allow_redirects=False)
-    sessao = Session()
 
     if (acesso.status_code == 302):
         return False
@@ -73,8 +72,6 @@ def perfilFoto():
         img = io.BytesIO()
         img.write(img_data)
         img.seek(0)
-
-        sessao = Session()
 
         return send_file(
             img,
@@ -99,8 +96,6 @@ def perfilDadosGerais(): # @TODO: finalizar coleta de dados
         sessao.cookies.set("JSESSIONID", cookie)
         siteHorarios = sessao.get(URLS['menu_action_matricula'] + matricula)
         sitePerfil = sessao.get(URLS['perfil_perfil_action'])
-
-        sessao = Session()
         
         return jsonify(
             {
@@ -131,7 +126,6 @@ def perfilDados(): #TODO: finalizar coleta de dados
 
         siteHorarios = sessao.get(URLS['menu_action_matricula'] + matricula)
         sitePerfil = sessao.get(URLS['perfil_perfil_action'])
-        sessao = Session()
 
         return jsonify({
                         "codigo":"200",
@@ -238,8 +232,6 @@ def horarios():
         for itemCelula in TdCelula:
             celula = itemCelula.find('a')
             print(celula.text)
-
-    sessao = Session()
 '''
     return jsonify({"retorno": "Nao Implementado!"})
 
@@ -261,8 +253,6 @@ def geraRelatorio():
         pdf = io.BytesIO()
         pdf.write(pdf_data)
         pdf.seek(0)
-
-        sessao = Session()
 
         return send_file(
             pdf,
@@ -298,8 +288,6 @@ def lista_relatorios():
             relatorio['link'] = item['href'].replace("/aluno/aluno/relatorio/",'')
             Relatorios.append(relatorio)
 
-        sessao = Session()
-
         return jsonify({
                         "codigo":"200",
                         "relatorios":Relatorios
@@ -326,8 +314,6 @@ def autenticacao():
 
     Matricula = sitePostBS.find("input", id="matricula")["value"]
     Cookie = sessao.cookies.get_dict()
-
-    sessao = Session()
 
     return jsonify({
         "autenticacao":{
