@@ -56,35 +56,9 @@ def Autenticado(cookie):
     else:
         return True
 
-@app.route('/perfil/foto', methods=['GET'])
-def perfilFoto():
 
-    sessao = Session()
-
-    cookie = request.args.get('cookie')
-    sessao.cookies.set("JSESSIONID", cookie)
-
-    if not Autenticado(cookie):
-        return jsonify({
-            "code": 401,
-            "error": "Nao autorizado"
-        })
-
-    img_data = sessao.get(URLS['foto_action']).content
-    img = io.BytesIO()
-    img.write(img_data)
-    img.seek(0)
-
-    return send_file(
-        img,
-        as_attachment=True,
-        attachment_filename='imagemPerfil.jpeg',
-        mimetype='image/jpeg'
-    )
-
-
-@app.route('/perfil/dados', methods=['GET'])
-def perfilDadosGerais(): # @TODO: finalizar coleta de dados
+@app.route('/perfil', methods=['GET'])
+def perfilDados():  # @TODO: finalizar coleta de dados
 
     sessao = Session()
 
@@ -114,8 +88,8 @@ def perfilDadosGerais(): # @TODO: finalizar coleta de dados
     )
 
 
-@app.route('/perfil/dados', methods=['GET'])
-def perfilDados(): #TODO: finalizar coleta de dados
+@app.route('/perfil/geral', methods=['GET'])
+def perfilDadosGerais():  # TODO: finalizar coleta de dados
 
     sessao = Session()
 
@@ -177,6 +151,32 @@ def perfilDados(): #TODO: finalizar coleta de dados
                         }
         }
     })
+
+
+@app.route('/perfil/foto', methods=['GET'])
+def perfilFoto():
+    sessao = Session()
+
+    cookie = request.args.get('cookie')
+    sessao.cookies.set("JSESSIONID", cookie)
+
+    if not Autenticado(cookie):
+        return jsonify({
+            "code": 401,
+            "error": "Nao autorizado"
+        })
+
+    img_data = sessao.get(URLS['foto_action']).content
+    img = io.BytesIO()
+    img.write(img_data)
+    img.seek(0)
+
+    return send_file(
+        img,
+        as_attachment=True,
+        attachment_filename='imagemPerfil.jpeg',
+        mimetype='image/jpeg'
+    )
 
 
 @app.route('/horarios', methods=['GET'])
@@ -244,34 +244,6 @@ def horarios():
     })
 
 
-@app.route('/relatorio', methods=['GET'])
-def geraRelatorio():
-    sessao = Session()
-
-    cookie = request.args.get('cookie')
-    link = request.args.get('link')
-
-    if not Autenticado(cookie):
-        return jsonify({
-            "code": 401,
-            "error": "Nao autorizado"
-        })
-
-    sessao.cookies.set("JSESSIONID", cookie)
-
-    pdf_data = sessao.get(URLS['aluno_relatorio'] + link).content
-    pdf = io.BytesIO()
-    pdf.write(pdf_data)
-    pdf.seek(0)
-
-    return send_file(
-        pdf,
-        as_attachment=True,
-        attachment_filename='relatorio.pdf',
-        mimetype='application/pdf'
-    )
-
-
 @app.route('/relatorios', methods=['GET'])
 def lista_relatorios():
     sessao = Session()
@@ -305,9 +277,36 @@ def lista_relatorios():
         })
 
 
+@app.route('/relatorios/pdf', methods=['GET'])
+def geraRelatorio():
+    sessao = Session()
+
+    cookie = request.args.get('cookie')
+    link = request.args.get('link')
+
+    if not Autenticado(cookie):
+        return jsonify({
+            "code": 401,
+            "error": "Nao autorizado"
+        })
+
+    sessao.cookies.set("JSESSIONID", cookie)
+
+    pdf_data = sessao.get(URLS['aluno_relatorio'] + link).content
+    pdf = io.BytesIO()
+    pdf.write(pdf_data)
+    pdf.seek(0)
+
+    return send_file(
+        pdf,
+        as_attachment=True,
+        attachment_filename='relatorio.pdf',
+        mimetype='application/pdf'
+    )
+
+
 @app.route('/autenticacao', methods=['POST'])
 def autenticacao():
-
     sessao = Session()
 
     usuario = request.get_json().get('usuario')
