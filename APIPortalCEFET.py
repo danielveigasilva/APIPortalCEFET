@@ -339,7 +339,7 @@ def autenticacao():
     })
 
 @app.errorhandler(404)
-def respond404():
+def respond404(error):
     return jsonify({
         "code": 404,
         "error": "Nao encontrado"
