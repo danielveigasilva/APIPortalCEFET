@@ -41,8 +41,8 @@ def pegaPropriedadePerfil(conteudoHTML, propriedade):
 
         return normalizacao(bloco.get_text())
 
-    except Exepction as e:
-        print('Exepction:' e)
+    except Exception as e:
+        print('Exception:' + e)
         return None
 
     
