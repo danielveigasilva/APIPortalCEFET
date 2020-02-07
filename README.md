@@ -64,9 +64,10 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
         Exemplo de json de retorno:
         ```json
         {
-            "autenticacao":{
-            "cookie":"B60E98A57D71D7BBEB80457A125436478",
-            "matricula":"123456"
+            "code": 200,
+            "data":{
+                "cookie":"B60E98A57D71D7BBEB80457A125436478",
+                "matricula":"123456"
             }
         }
         ```
@@ -85,7 +86,7 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
         ```json
         {
            "codigo": 200,
-           "relatorios":[
+           "data":[
                 {
                     "id":0,
                     "link":"atestadoTrancamento.action?matricula=123456",
@@ -95,7 +96,8 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
                     "id":1,
                     "link":"boletimEscolar.action?matricula=123456",
                     "nome":"Boletim Escolar"
-                }]
+                }
+           ]
         }
         ```
 
