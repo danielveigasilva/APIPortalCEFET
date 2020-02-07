@@ -338,6 +338,12 @@ def autenticacao():
         }
     })
 
+@app.errorhandler(404)
+def respond404():
+    return jsonify({
+        "code": 404,
+        "error": "Nao encontrado"
+    })
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
