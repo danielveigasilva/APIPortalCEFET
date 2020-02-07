@@ -56,7 +56,7 @@ def Autenticado(cookie):
         return True
 
 
-@app.route('/perfilFoto/', methods=['GET'])
+@app.route('/perfil/foto', methods=['GET'])
 def perfilFoto():
     sessao = Session()
 
@@ -81,7 +81,7 @@ def perfilFoto():
         return jsonify({"codigo": "400", "msg": "Cookie invalido"})
 
 
-@app.route('/perfilDadosGerais/', methods=['GET'])
+@app.route('/perfil/dados', methods=['GET'])
 def perfilDadosGerais():  # @TODO: finalizar coleta de dados
 
     sessao = Session()
@@ -113,7 +113,7 @@ def perfilDadosGerais():  # @TODO: finalizar coleta de dados
         return jsonify({"codigo": "400", "msg": "Cookie invalido"})
 
 
-@app.route('/perfilDados/', methods=['GET'])
+@app.route('/perfil/dados/completo', methods=['GET'])
 def perfilDados():  # TODO: finalizar coleta de dados
 
     sessao = Session()
@@ -178,7 +178,7 @@ def perfilDados():  # TODO: finalizar coleta de dados
         return jsonify({"codigo": "400", "msg": "Cookie invalido"})
 
 
-@app.route('/horarios/', methods=['GET'])
+@app.route('/horarios', methods=['GET'])
 def horarios():
     '''
     sessao = Session()
@@ -242,7 +242,7 @@ def horarios():
     return jsonify({"retorno": "Nao Implementado!"})
 
 
-@app.route('/geraRelatorio/', methods=['GET'])
+@app.route('/relatorio', methods=['GET'])
 def geraRelatorio():
     sessao = Session()
 
@@ -270,7 +270,7 @@ def geraRelatorio():
         return jsonify({"codigo": "400", "msg": "Cookie invalido"})
 
 
-@app.route('/listaRelatorios/', methods=['GET'])
+@app.route('/relatorios', methods=['GET'])
 def lista_relatorios():
     sessao = Session()
 
@@ -303,7 +303,7 @@ def lista_relatorios():
         return jsonify({"codigo": "400", "msg": "Cookie invalido"})
 
 
-@app.route('/autenticacao/', methods=['POST'])
+@app.route('/autenticacao', methods=['POST'])
 def autenticacao():
     sessao = Session()
 

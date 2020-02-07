@@ -49,7 +49,7 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
         
         URL:
         ```url
-        https://api-portal-cefet.herokuapp.com/autenticacao/
+        https://api-portal-cefet.herokuapp.com/autenticacao
         ```
         
         Json:
@@ -77,7 +77,7 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
     
         Esta função é responsável por listar os relatórios disponíveis para o seu perfil. Deve seguir o padrão abaixo para sua execução:
         ```url
-        https://api-portal-cefet.herokuapp.com/listaRelatorios/?cookie=COOKIE_AUTENTICADO_AQUI&matricula=MATRICULA_INTERNA_AQUI
+        https://api-portal-cefet.herokuapp.com/relatorios?cookie=COOKIE_AUTENTICADO_AQUI&matricula=MATRICULA_INTERNA_AQUI
         ```
         Se o cookie e a matrícula forem válidos o retorno será um json contendo o código 200 e uma lista de relatórios contendo *ID*, *Nome* e *Link*.
     
@@ -103,7 +103,7 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
     
         Esta função é responsável por gerar um relatório expecificado pelo link (item passado pela função listaRelatorios). Deve seguir o padrão abaixo para sua execução:
         ```url
-        https://api-portal-cefet.herokuapp.com/geraRelatorio/?cookie=COOKIE_AUTENTICADO_AQUI&link=LINK_RELATORIO_AQUI
+        https://api-portal-cefet.herokuapp.com/relatorio?cookie=COOKIE_AUTENTICADO_AQUI&link=LINK_RELATORIO_AQUI
         ```
         Se o cookie e o link forem válidos o retorno será um arquivo *relatorio.pdf*.
 
@@ -113,7 +113,7 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
     
         Esta função é responsável por listar os dados cadastrados, tais como *endereço*, *número de telefone*, *E-mail* e etc. Deve seguir o padrão abaixo para sua execução:
         ```url
-        https://api-portal-cefet.herokuapp.com/perfilDados/?cookie=COOKIE_AUTENTICADO_AQUI&matricula=MATRICULA_INTERNA_AQUI
+        https://api-portal-cefet.herokuapp.com/perfil/dados/completo?cookie=COOKIE_AUTENTICADO_AQUI&matricula=MATRICULA_INTERNA_AQUI
         ```
         Se o cookie e a matrícula forem válidos o retorno será um json contendo o código 200 e uma lista de dados divididos em quadro tipos: *academico*, *informacoes*, *endereco* e *documentos*.
     
@@ -145,7 +145,7 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
     
         Esta função é responsável por listar os dados principais (*Nome, Curso, Matrícula Acadêmica e Período*). Deve seguir o padrão abaixo para sua execução:
         ```url
-        https://api-portal-cefet.herokuapp.com/listaRelatoriosGerais/?cookie=COOKIE_AUTENTICADO_AQUI&matricula=MATRICULA_INTERNA_AQUI
+        https://api-portal-cefet.herokuapp.com/perfil/dados?cookie=COOKIE_AUTENTICADO_AQUI&matricula=MATRICULA_INTERNA_AQUI
         ```
         Se o cookie e a matrícula forem válidos o retorno será um json contendo o código 200 e uma lista de dados.
     
@@ -167,7 +167,7 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
     
         Esta função é responsável por obter a foto de perfil cadastrada no portal. Deve seguir o padrão abaixo para sua execução:
         ```url
-        https://api-portal-cefet.herokuapp.com/perfilFoto/?cookie=COOKIE_AUTENTICADO_AQUI
+        https://api-portal-cefet.herokuapp.com/perfil/foto?cookie=COOKIE_AUTENTICADO_AQUI
         ```
         Se o cookie for válido o retorno será um arquivo *imagemPerfil.jpeg*.
 
