@@ -1,14 +1,28 @@
 from flask import Flask, jsonify, request, send_file
+import urllib.request
+import html
 import unicodedata
 import os
 import io
 
 from requests import Session
 from bs4 import BeautifulSoup as bs
+import json
 import re
 
 app = Flask(__name__)
-sessao = Session()
+
+URLS = {
+    'matricula': 'https://alunos.cefet-rj.br/matricula/',
+    'index_action': 'https://alunos.cefet-rj.br/aluno/index.action',
+    'foto_action': 'https://alunos.cefet-rj.br/aluno/aluno/foto.action',
+    'menu_action_matricula': 'https://alunos.cefet-rj.br/aluno/aluno/quadrohorario/menu.action?matricula=',
+    'perfil_perfil_action': 'https://alunos.cefet-rj.br/aluno/aluno/perfil/perfil.action',
+    'aluno_relatorio': 'https://alunos.cefet-rj.br/aluno/aluno/relatorio/',
+    'relatorio_action_matricula': 'https://alunos.cefet-rj.br/aluno/aluno/relatorio/relatorios.action?matricula=',
+    'aluno_login_action_error': 'https://alunos.cefet-rj.br/aluno/login.action?error=',
+    'security_check': 'https://alunos.cefet-rj.br/aluno/j_security_check'
+}
 
 
 def normalizacao(texto):
@@ -26,16 +40,18 @@ def pegaPropriedadePerfil(conteudoHTML, propriedade):
 
         return normalizacao(bloco.get_text())
 
-    except:
+    except Exception as e:
+        print('Exception:' + e)
         return None
 
 
 def Autenticado(cookie):
     sessao = Session()
     sessao.cookies.set("JSESSIONID", cookie)
-    sessao.headers.update({'referer': 'https://alunos.cefet-rj.br/matricula/'})
+    sessao.headers.update({'referer': URLS['matricula']})
 
-    acesso = sessao.get("https://alunos.cefet-rj.br/aluno/index.action", allow_redirects=False)
+    acesso = sessao.get(URLS['index_action'], allow_redirects=False)
+    sessao = Session()
 
     if (acesso.status_code == 302):
         return False
@@ -43,63 +59,64 @@ def Autenticado(cookie):
         return True
 
 
-@app.route('/perfil/foto', methods=['GET'])
+@app.route('/perfilFoto/', methods=['GET'])
 def perfilFoto():
     sessao = Session()
 
     cookie = request.args.get('cookie')
     sessao.cookies.set("JSESSIONID", cookie)
 
-    if not Autenticado(cookie):
-        return jsonify({
-            "codigo": 401,
-            "error": "Cookie invalido"
-        })
+    if (Autenticado(cookie)):
+        img_data = sessao.get(URLS['foto_action']).content
+        img = io.BytesIO()
+        img.write(img_data)
+        img.seek(0)
 
-    img_data = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/foto.action").content
-    img = io.BytesIO()
-    img.write(img_data)
-    img.seek(0)
+        sessao = Session()
 
-    return send_file(
-        img,
-        as_attachment=True,
-        attachment_filename='imagemPerfil.jpeg',
-        mimetype='image/jpeg'
-    )
+        return send_file(
+            img,
+            as_attachment=True,
+            attachment_filename='imagemPerfil.jpeg',
+            mimetype='image/jpeg'
+        )
+    else:
+        return jsonify({"codigo": "400", "msg": "Cookie invalido"})
 
 
-@app.route('/perfil/dados', methods=['GET'])
-def perfilDadosGerais():  # TODO: finalizar coleta de dados
+@app.route('/perfilDadosGerais/', methods=['GET'])
+def perfilDadosGerais():  # @TODO: finalizar coleta de dados
 
     sessao = Session()
 
     cookie = request.args.get('cookie')
     matricula = request.args.get('matricula')
 
-    if not Autenticado(cookie):
-        return jsonify({
-            "codigo": 401,
-            "error": "Cookie invalido"
-        })
+    if (Autenticado(cookie)):
 
-    sessao.cookies.set("JSESSIONID", cookie)
-    siteHorarios = sessao.get(
-        "https://alunos.cefet-rj.br/aluno/aluno/quadrohorario/menu.action?matricula=" + matricula)
-    sitePerfil = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/perfil/perfil.action")
+        sessao.cookies.set("JSESSIONID", cookie)
+        siteHorarios = sessao.get(URLS['menu_action_matricula'] + matricula)
+        sitePerfil = sessao.get(URLS['perfil_perfil_action'])
 
-    return jsonify({
-        "codigo": 200,
-        "data": {
-            "Matricula": pegaPropriedadePerfil(siteHorarios.content, '.Matrícula:'),
-            "Curso": pegaPropriedadePerfil(siteHorarios.content, '.Curso:'),
-            "Periodo Atual": pegaPropriedadePerfil(siteHorarios.content, '.Período Atual:'),
-            "Nome": pegaPropriedadePerfil(sitePerfil.content, '.Nome')
-        }
-    })
+        sessao = Session()
+
+        return jsonify(
+            {
+                "codigo": "200",
+                "informacoes": {
+                    "Matricula": pegaPropriedadePerfil(siteHorarios.content, '.Matrícula:'),
+                    "Curso": pegaPropriedadePerfil(siteHorarios.content, '.Curso:'),
+                    "Periodo Atual": pegaPropriedadePerfil(siteHorarios.content, '.Período Atual:'),
+                    "Nome": pegaPropriedadePerfil(sitePerfil.content, '.Nome')
+                }
+            }
+        )
+
+    else:
+        return jsonify({"codigo": "400", "msg": "Cookie invalido"})
 
 
-@app.route('/perfil/dados/todos', methods=['GET'])
+@app.route('/perfilDados/', methods=['GET'])
 def perfilDados():  # TODO: finalizar coleta de dados
 
     sessao = Session()
@@ -108,19 +125,14 @@ def perfilDados():  # TODO: finalizar coleta de dados
     matricula = request.args.get('matricula')
     sessao.cookies.set("JSESSIONID", cookie)
 
-    if not Autenticado(cookie):
+    if (Autenticado(cookie)):
+
+        siteHorarios = sessao.get(URLS['menu_action_matricula'] + matricula)
+        sitePerfil = sessao.get(URLS['perfil_perfil_action'])
+        sessao = Session()
+
         return jsonify({
-            "codigo": 401,
-            "error": "Cookie invalido"
-        })
-
-    siteHorarios = sessao.get(
-        "https://alunos.cefet-rj.br/aluno/aluno/quadrohorario/menu.action?matricula=" + matricula)
-    sitePerfil = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/perfil/perfil.action")
-
-    return jsonify({
-        "codigo": 200,
-        "data": {
+            "codigo": "200",
             "academico": {
                 "Matricula": pegaPropriedadePerfil(siteHorarios.content, '.Matrícula:'),
                 "Curso": pegaPropriedadePerfil(siteHorarios.content, '.Curso:'),
@@ -164,11 +176,12 @@ def perfilDados():  # TODO: finalizar coleta de dados
                 "Tel. Comercial": pegaPropriedadePerfil(sitePerfil.content, '.Tel. Comercial'),
                 "Fax": pegaPropriedadePerfil(sitePerfil.content, '.Fax')
             }
-        }
-    })
+        })
+    else:
+        return jsonify({"codigo": "400", "msg": "Cookie invalido"})
 
 
-@app.route('/horarios', methods=['GET'])
+@app.route('/horarios/', methods=['GET'])
 def horarios():
     '''
     sessao = Session()
@@ -177,9 +190,9 @@ def horarios():
     matricula = request.args.get('matricula')
 
     if (Autenticado(cookie)):
-        
+
     sessao.cookies.set("JSESSIONID", cookie)
-    
+
     siteHorarios = sessao.get("https://alunos.cefet-rj.br/aluno/ajax/aluno/quadrohorario/quadrohorario.action?matricula=" + matricula)
     siteHorariosBS = bs(siteHorarios.content, "html.parser")
 
@@ -220,112 +233,101 @@ def horarios():
     TrLinhas = HorariosTabela.find_all('tr')
 
     for itemTrLinhas in TrLinhas:
-        
+
         TdCelula = TrLinhas.find_all('td')
-        
+
         for itemCelula in TdCelula:
             celula = itemCelula.find('a')
             print(celula.text)
 
     sessao = Session()
 '''
-    return jsonify({
-        "code": 501,
-        "error": "Nao Implementado"
-    })
+    return jsonify({"retorno": "Nao Implementado!"})
 
 
-@app.route('/relatorio', methods=['GET'])
+@app.route('/geraRelatorio/', methods=['GET'])
 def geraRelatorio():
     sessao = Session()
 
     cookie = request.args.get('cookie')
     link = request.args.get('link')
 
-    if not Autenticado(cookie):
-        return jsonify({
-            "codigo": 401,
-            "error": "Cookie invalido"
-        })
+    if (Autenticado(cookie)):
 
-    sessao.cookies.set("JSESSIONID", cookie)
+        sessao.cookies.set("JSESSIONID", cookie)
 
-    pdf_data = sessao.get("https://alunos.cefet-rj.br/aluno/aluno/relatorio/" + link).content
-    pdf = io.BytesIO()
-    pdf.write(pdf_data)
-    pdf.seek(0)
+        pdf_data = sessao.get(URLS['aluno_relatorio'] + link).content
+        pdf = io.BytesIO()
+        pdf.write(pdf_data)
+        pdf.seek(0)
 
-    return send_file(
-        pdf,
-        as_attachment=True,
-        attachment_filename='relatorio.pdf',
-        mimetype='application/pdf'
-    )
+        sessao = Session()
+
+        return send_file(
+            pdf,
+            as_attachment=True,
+            attachment_filename='relatorio.pdf',
+            mimetype='application/pdf'
+        )
+    else:
+        return jsonify({"codigo": "400", "msg": "Cookie invalido"})
 
 
-@app.route('/relatorios', methods=['GET'])
-def listaRelatorios():
+@app.route('/listaRelatorios/', methods=['GET'])
+def lista_relatorios():
     sessao = Session()
 
     cookie = request.args.get('cookie')
     matricula = request.args.get('matricula')
 
-    if not Autenticado(cookie):
+    if (Autenticado(cookie)):
+
+        sessao.cookies.set("JSESSIONID", cookie)
+        siteRelatorios = sessao.get(URLS['relatorio_action_matricula'] + matricula)
+        siteRelatoriosBS = bs(siteRelatorios.content, "html.parser")
+
+        RelatoriosBrutos = siteRelatoriosBS.find_all('a', {'title': 'Relatório em formato PDF'})
+
+        Relatorios = []
+        for item in RelatoriosBrutos:
+            relatorio = {}
+            relatorio['id'] = RelatoriosBrutos.index(item)
+            relatorio['nome'] = normalizacao(item.previousSibling)
+            relatorio['link'] = item['href'].replace("/aluno/aluno/relatorio/", '')
+            Relatorios.append(relatorio)
+
+        sessao = Session()
+
         return jsonify({
-            "codigo": 401,
-            "error": "Cookie invalido"
-        })
-
-    sessao.cookies.set("JSESSIONID", cookie)
-    siteRelatorios = sessao.get(
-        "https://alunos.cefet-rj.br/aluno/aluno/relatorio/relatorios.action?matricula=" + matricula)
-    siteRelatoriosBS = bs(siteRelatorios.content, "html.parser")
-
-    RelatoriosBrutos = siteRelatoriosBS.find_all('a', {'title': 'Relatório em formato PDF'})
-
-    Relatorios = []
-    for item in RelatoriosBrutos:
-        relatorio = {}
-        relatorio['id'] = RelatoriosBrutos.index(item)
-        relatorio['nome'] = normalizacao(item.previousSibling)
-        relatorio['link'] = item['href'].replace("/aluno/aluno/relatorio/", '')
-        Relatorios.append(relatorio)
-
-    return jsonify({
-        "code": 200,
-        "data": {
+            "codigo": "200",
             "relatorios": Relatorios
-        }
-    })
+        })
+    else:
+        return jsonify({"codigo": "400", "msg": "Cookie invalido"})
 
 
-@app.route('/autenticacao', methods=['GET'])
+@app.route('/autenticacao/', methods=['POST'])
 def autenticacao():
     sessao = Session()
 
-    usuario = request.args.get('usuario')
-    senha = request.args.get('senha')
+    usuario = request.get_json().get('usuario')
+    senha = request.get_json().get('senha')
 
-    sessao.headers.update({'referer': 'https://alunos.cefet-rj.br/matricula/'})
-    sessao.get("https://alunos.cefet-rj.br/aluno/login.action?error=")
+    sessao.headers.update({'referer': URLS['matricula']})
+    sessao.get(URLS['aluno_login_action_error'])
 
     dados_login = {"j_username": usuario, "j_password": senha}
 
-    sitePost = sessao.post("https://alunos.cefet-rj.br/aluno/j_security_check", data=dados_login)
+    sitePost = sessao.post(URLS['security_check'], data=dados_login)
     sitePostBS = bs(sitePost.content, "html.parser")
 
     Matricula = sitePostBS.find("input", id="matricula")["value"]
     Cookie = sessao.cookies.get_dict()
 
-    if Cookie == "":
-        return jsonify({
-            "code": 401,
-            "error": "Sem Autorização"
-        })
+    sessao = Session()
 
     return jsonify({
-        "code": 200,
-        "data": {
+        "autenticacao": {
             "matricula": Matricula,
             "cookie": Cookie['JSESSIONID']
         }
@@ -334,16 +336,5 @@ def autenticacao():
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
-    app.run(debug=False, host='0.0.0.0', port=port)
-    # app.run(debug=True, host='127.0.0.1', port=port)
-
-# ------------------------LINKS-------------------------
-
-# OK - Perfil         - https://alunos.cefet-rj.br/aluno/aluno/perfil/perfil.action
-# AlterarSenha   - https://alunos.cefet-rj.br/usuario/usuario/usuario.action?br.com.asten.si.geral.web.spring.interceptors.AplicacaoWebChangeInterceptor.aplicacaoWeb=1
-# Matricula      - https://alunos.cefet-rj.br/aluno/aluno/matricula/solicitacoes.action?matricula=           +  siteMatricula
-# OK - Relatorio      - https://alunos.cefet-rj.br/aluno/aluno/relatorio/relatorios.action?matricula=             +  siteMatricula
-# Horarios       - https://alunos.cefet-rj.br/aluno/aluno/quadrohorario/menu.action?matricula=               +  siteMatricula
-# Notas          - https://alunos.cefet-rj.br/aluno/aluno/nota/nota.action?matricula=                        +  siteMatricula
-# Comunicacoes   - https://alunos.cefet-rj.br/comunicacoes/noticia/list.action?br.com.asten.si.geral.web.spring.interceptors.AplicacaoWebChangeInterceptor.aplicacaoWeb=1
-# Manuais        - https://alunos.cefet-rj.br/aluno/manuais.action
+    app.run(debug=False, host='0.0.0.0', port=port)  # para prod, ative aqui!
+    # app.run(debug=True, host='127.0.0.1', port=port)  # para dev, ative aqui!
