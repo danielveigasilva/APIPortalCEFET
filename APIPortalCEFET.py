@@ -1,13 +1,10 @@
 from flask import Flask, jsonify, request, send_file
-import urllib.request      
-import html
 import unicodedata
 import os
 import io
 
 from requests import Session
 from bs4 import BeautifulSoup as bs
-import json
 import re
 
 app = Flask(__name__)
@@ -53,98 +50,75 @@ def Autenticado(cookie):
     sessao.headers.update({'referer': URLS['matricula']})
 
     acesso = sessao.get(URLS['index_action'], allow_redirects=False)
-    sessao = Session()
 
     if (acesso.status_code == 302):
         return False
     else:
         return True
 
-@app.route('/perfilFoto/', methods=['GET'])
-def perfilFoto():
 
-    sessao = Session()
-    
-    cookie = request.args.get('cookie')
-    sessao.cookies.set("JSESSIONID", cookie)
-    
-    if (Autenticado(cookie)):
-        img_data = sessao.get(URLS['foto_action']).content
-        img = io.BytesIO()
-        img.write(img_data)
-        img.seek(0)
-
-        sessao = Session()
-
-        return send_file(
-            img,
-            as_attachment=True,
-            attachment_filename='imagemPerfil.jpeg',
-            mimetype='image/jpeg'
-        )
-    else:
-        return jsonify({"codigo":"400", "msg":"Cookie invalido"})
-
-
-@app.route('/perfilDadosGerais/', methods=['GET'])
-def perfilDadosGerais(): # @TODO: finalizar coleta de dados
+@app.route('/perfil', methods=['GET'])
+def perfilDados():  # @TODO: finalizar coleta de dados
 
     sessao = Session()
 
     cookie = request.args.get('cookie')
     matricula = request.args.get('matricula')
 
-    if (Autenticado(cookie)):
-
-        sessao.cookies.set("JSESSIONID", cookie)
-        siteHorarios = sessao.get(URLS['menu_action_matricula'] + matricula)
-        sitePerfil = sessao.get(URLS['perfil_perfil_action'])
-
-        sessao = Session()
-        
-        return jsonify(
-            {
-                "codigo":"200",
-                "informacoes":{
-                    "Matricula": pegaPropriedadePerfil(siteHorarios.content, '.Matrícula:'),
-                    "Curso": pegaPropriedadePerfil(siteHorarios.content, '.Curso:'),
-                    "Periodo Atual": pegaPropriedadePerfil(siteHorarios.content, '.Período Atual:'),
-                    "Nome": pegaPropriedadePerfil(sitePerfil.content, '.Nome')
-                }
-            }
-        )
-    
-    else:
-        return jsonify({"codigo":"400", "msg":"Cookie invalido"})
-        
-
-@app.route('/perfilDados/', methods=['GET'])
-def perfilDados(): #TODO: finalizar coleta de dados
-
-    sessao = Session()
-
-    cookie = request.args.get('cookie')
-    matricula = request.args.get('matricula')
-    sessao.cookies.set("JSESSIONID", cookie)
-
-    if (Autenticado(cookie)):
-
-        siteHorarios = sessao.get(URLS['menu_action_matricula'] + matricula)
-        sitePerfil = sessao.get(URLS['perfil_perfil_action'])
-        sessao = Session()
-
+    if not Autenticado(cookie):
         return jsonify({
-                        "codigo":"200",
-                        "academico":{
-                            "Matricula":        pegaPropriedadePerfil(siteHorarios.content, '.Matrícula:'),
-                            "Curso":            pegaPropriedadePerfil(siteHorarios.content, '.Curso:'),
-                            "Periodo Atual":    pegaPropriedadePerfil(siteHorarios.content, '.Período Atual:')
-                        },
-                        "informacoes":{
-                            "Nome":             pegaPropriedadePerfil(sitePerfil.content, '.Nome'),
-                            "Nome da Mae":      pegaPropriedadePerfil(sitePerfil.content, '.Nome da Mãe'),
-                            "Nome do Pai":      pegaPropriedadePerfil(sitePerfil.content, '.Nome da Pai'),
-                            "Nascimento":       pegaPropriedadePerfil(sitePerfil.content, '.Nascimento'),
+            "code": 401,
+            "error": "Nao autorizado"
+        })
+
+    sessao.cookies.set("JSESSIONID", cookie)
+    siteHorarios = sessao.get(URLS['menu_action_matricula'] + matricula)
+    sitePerfil = sessao.get(URLS['perfil_perfil_action'])
+
+    return jsonify(
+        {
+            "codigo": 200,
+            "data": {
+                "Matricula": pegaPropriedadePerfil(siteHorarios.content, '.Matrícula:'),
+                "Curso": pegaPropriedadePerfil(siteHorarios.content, '.Curso:'),
+                "Periodo Atual": pegaPropriedadePerfil(siteHorarios.content, '.Período Atual:'),
+                "Nome": pegaPropriedadePerfil(sitePerfil.content, '.Nome')
+            }
+        }
+    )
+
+
+@app.route('/perfil/geral', methods=['GET'])
+def perfilDadosGerais():  # TODO: finalizar coleta de dados
+
+    sessao = Session()
+
+    cookie = request.args.get('cookie')
+    matricula = request.args.get('matricula')
+    sessao.cookies.set("JSESSIONID", cookie)
+
+    if not Autenticado(cookie):
+        return jsonify({
+            "code": 401,
+            "error": "Nao autorizado"
+        })
+
+    siteHorarios = sessao.get(URLS['menu_action_matricula'] + matricula)
+    sitePerfil = sessao.get(URLS['perfil_perfil_action'])
+
+    return jsonify({
+        "codigo": 200,
+        "data": {
+            "academico": {
+                "Matricula": pegaPropriedadePerfil(siteHorarios.content, '.Matrícula:'),
+                "Curso": pegaPropriedadePerfil(siteHorarios.content, '.Curso:'),
+                "Periodo Atual": pegaPropriedadePerfil(siteHorarios.content, '.Período Atual:')
+            },
+            "informacoes": {
+                "Nome": pegaPropriedadePerfil(sitePerfil.content, '.Nome'),
+                "Nome da Mae": pegaPropriedadePerfil(sitePerfil.content, '.Nome da Mãe'),
+                "Nome do Pai": pegaPropriedadePerfil(sitePerfil.content, '.Nome da Pai'),
+                "Nascimento": pegaPropriedadePerfil(sitePerfil.content, '.Nascimento'),
                             "Sexo":             pegaPropriedadePerfil(sitePerfil.content, '.Sexo'),
                             "Etnia":            pegaPropriedadePerfil(sitePerfil.content, '.Etnia'),
                             "Deficiencia":      pegaPropriedadePerfil(sitePerfil.content, '.Deficiência'),
@@ -165,22 +139,47 @@ def perfilDados(): #TODO: finalizar coleta de dados
                             "Bairro":               pegaPropriedadePerfil(sitePerfil.content, '.Bairro'),
                             "Pais":                 pegaPropriedadePerfil(sitePerfil.content, '.País'),
                             "Estado":               pegaPropriedadePerfil(sitePerfil.content, '.Estado'), #TODO: consertar bug, Estado obtem Estado Civil
-                            "Cidade":               pegaPropriedadePerfil(sitePerfil.content, '.Cidade'),
-                            "Distrito":             pegaPropriedadePerfil(sitePerfil.content, '.Distrito'),
-                            "CEP":                  pegaPropriedadePerfil(sitePerfil.content, '.CEP'),
-                            "Caixa Postal":         pegaPropriedadePerfil(sitePerfil.content, '.Caixa Postal'),
-                            "E-mail":               pegaPropriedadePerfil(sitePerfil.content, '.E-mail'),
-                            "Tel. Residencial":     pegaPropriedadePerfil(sitePerfil.content, '.Tel. Residencial'),
-                            "Tel. Celular":         pegaPropriedadePerfil(sitePerfil.content, '.Tel. Celular'),
-                            "Tel. Comercial":       pegaPropriedadePerfil(sitePerfil.content, '.Tel. Comercial'),
-                            "Fax":                  pegaPropriedadePerfil(sitePerfil.content, '.Fax')
+                            "Cidade": pegaPropriedadePerfil(sitePerfil.content, '.Cidade'),
+                            "Distrito": pegaPropriedadePerfil(sitePerfil.content, '.Distrito'),
+                            "CEP": pegaPropriedadePerfil(sitePerfil.content, '.CEP'),
+                            "Caixa Postal": pegaPropriedadePerfil(sitePerfil.content, '.Caixa Postal'),
+                            "E-mail": pegaPropriedadePerfil(sitePerfil.content, '.E-mail'),
+                            "Tel. Residencial": pegaPropriedadePerfil(sitePerfil.content, '.Tel. Residencial'),
+                            "Tel. Celular": pegaPropriedadePerfil(sitePerfil.content, '.Tel. Celular'),
+                            "Tel. Comercial": pegaPropriedadePerfil(sitePerfil.content, '.Tel. Comercial'),
+                            "Fax": pegaPropriedadePerfil(sitePerfil.content, '.Fax')
                         }
-                    })
-    else:
-        return jsonify({"codigo":"400", "msg":"Cookie invalido"})
+        }
+    })
 
-    
-@app.route('/horarios/', methods=['GET'])
+
+@app.route('/perfil/foto', methods=['GET'])
+def perfilFoto():
+    sessao = Session()
+
+    cookie = request.args.get('cookie')
+    sessao.cookies.set("JSESSIONID", cookie)
+
+    if not Autenticado(cookie):
+        return jsonify({
+            "code": 401,
+            "error": "Nao autorizado"
+        })
+
+    img_data = sessao.get(URLS['foto_action']).content
+    img = io.BytesIO()
+    img.write(img_data)
+    img.seek(0)
+
+    return send_file(
+        img,
+        as_attachment=True,
+        attachment_filename='imagemPerfil.jpeg',
+        mimetype='image/jpeg'
+    )
+
+
+@app.route('/horarios', methods=['GET'])
 def horarios():
     '''
     sessao = Session()
@@ -238,79 +237,76 @@ def horarios():
         for itemCelula in TdCelula:
             celula = itemCelula.find('a')
             print(celula.text)
-
-    sessao = Session()
 '''
-    return jsonify({"retorno": "Nao Implementado!"})
+    return jsonify({
+        "code": 501,
+        "error": "Nao Implementado"
+    })
 
 
+@app.route('/relatorios', methods=['GET'])
+def lista_relatorios():
+    sessao = Session()
 
-@app.route('/geraRelatorio/', methods=['GET'])
+    cookie = request.args.get('cookie')
+    matricula = request.args.get('matricula')
+
+    if not Autenticado(cookie):
+        return jsonify({
+            "code": 401,
+            "error": "Nao autorizado"
+        })
+
+    sessao.cookies.set("JSESSIONID", cookie)
+    siteRelatorios = sessao.get(URLS['relatorio_action_matricula'] + matricula)
+    siteRelatoriosBS = bs(siteRelatorios.content, "html.parser")
+
+    RelatoriosBrutos = siteRelatoriosBS.find_all('a', {'title': 'Relatório em formato PDF'})
+
+    Relatorios = []
+    for item in RelatoriosBrutos:
+        relatorio = {}
+        relatorio['id'] = RelatoriosBrutos.index(item)
+        relatorio['nome'] = normalizacao(item.previousSibling)
+        relatorio['link'] = item['href'].replace("/aluno/aluno/relatorio/", '')
+        Relatorios.append(relatorio)
+
+        return jsonify({
+            "codigo": 200,
+            "data": Relatorios
+        })
+
+
+@app.route('/relatorios/pdf', methods=['GET'])
 def geraRelatorio():
-    
     sessao = Session()
 
     cookie = request.args.get('cookie')
     link = request.args.get('link')
 
-    if (Autenticado(cookie)):
-        
-        sessao.cookies.set("JSESSIONID", cookie)
-
-        pdf_data = sessao.get(URLS['aluno_relatorio']+link).content
-        pdf = io.BytesIO()
-        pdf.write(pdf_data)
-        pdf.seek(0)
-
-        sessao = Session()
-
-        return send_file(
-            pdf,
-            as_attachment=True,
-            attachment_filename='relatorio.pdf',
-            mimetype='application/pdf'
-        )
-    else:
-        return jsonify({"codigo":"400", "msg":"Cookie invalido"})
-
-    
-@app.route('/listaRelatorios/', methods=['GET'])
-def lista_relatorios():
-    
-    sessao = Session()
-
-    cookie = request.args.get('cookie')
-    matricula = request.args.get('matricula')
-    
-    if (Autenticado(cookie)):
-
-        sessao.cookies.set("JSESSIONID", cookie)
-        siteRelatorios = sessao.get(URLS['relatorio_action_matricula']+matricula)
-        siteRelatoriosBS = bs(siteRelatorios.content, "html.parser")
-
-        RelatoriosBrutos = siteRelatoriosBS.find_all('a', {'title':'Relatório em formato PDF'})
-
-        Relatorios = []
-        for item in RelatoriosBrutos:
-            relatorio = {}
-            relatorio['id'] = RelatoriosBrutos.index(item)
-            relatorio['nome'] = normalizacao(item.previousSibling)
-            relatorio['link'] = item['href'].replace("/aluno/aluno/relatorio/",'')
-            Relatorios.append(relatorio)
-
-        sessao = Session()
-
+    if not Autenticado(cookie):
         return jsonify({
-                        "codigo":"200",
-                        "relatorios":Relatorios
-                    })
-    else:
-        return jsonify({"codigo":"400", "msg":"Cookie invalido"})
+            "code": 401,
+            "error": "Nao autorizado"
+        })
 
-    
-@app.route('/autenticacao/', methods=['POST'])
+    sessao.cookies.set("JSESSIONID", cookie)
+
+    pdf_data = sessao.get(URLS['aluno_relatorio'] + link).content
+    pdf = io.BytesIO()
+    pdf.write(pdf_data)
+    pdf.seek(0)
+
+    return send_file(
+        pdf,
+        as_attachment=True,
+        attachment_filename='relatorio.pdf',
+        mimetype='application/pdf'
+    )
+
+
+@app.route('/autenticacao', methods=['POST'])
 def autenticacao():
-
     sessao = Session()
 
     usuario = request.get_json().get('usuario')
@@ -327,15 +323,26 @@ def autenticacao():
     Matricula = sitePostBS.find("input", id="matricula")["value"]
     Cookie = sessao.cookies.get_dict()
 
-    sessao = Session()
+    if Cookie == '':
+        return jsonify({
+            "code": 401,
+            "error": "Nao autorizado"
+        })
 
     return jsonify({
-        "autenticacao":{
+        "code": 200,
+        "data": {
             "matricula": Matricula,
             "cookie": Cookie['JSESSIONID']
-         }
+        }
     })
 
+@app.errorhandler(404)
+def respond404(error):
+    return jsonify({
+        "code": 404,
+        "error": "Nao encontrado"
+    })
 
 if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
