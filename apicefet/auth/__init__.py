@@ -1,14 +1,17 @@
 from itsdangerous import TimedJSONWebSignatureSerializer
 from bs4 import BeautifulSoup as bs
 from apicefet.helpers import URLS
+from flask import jsonify, request
 from requests import Session
-from flask import jsonify
 
 
-def auth(user, passwd):
+def auth():
     session = Session()
     session.headers.update({'referer': URLS['matricula']})
     session.get(URLS['aluno_login_action_error'])
+
+    user = request.get_json().get('usuario')
+    passwd = request.get_json().get('senha')
 
     auth_info = {"j_username": user, "j_password": passwd}
 
