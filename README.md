@@ -53,7 +53,7 @@ https://api-portal-cefet.herokuapp.com
 ### Funções
 
 1. **Autenticação**
-    - **/token/{matricula}/{senha}** _[ GET ]_
+    - **/auth** _[ POST ]_
     
         Esta função é responsável por autenticar uma nova sessão no portal.
         O conteudo da sessão devera ser um json contendo a matricula e a senha
@@ -194,7 +194,7 @@ https://api-portal-cefet.herokuapp.com
         Esta função é responsável por gerar um relatório expecificado pelo link.
         
         ```url
-        curl -XGET -H 'X-Token: {token}' 'https://api-portal-cefet.herokuapp.com/relatorios/{link}/pdf'
+        curl -XGET -H 'X-Token: {token}' 'https://api-portal-cefet.herokuapp.com/relatorios/{link}'
         ```
         Se o token for válido o retorno será um arquivo *relatorio.pdf*.
         
