@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import abort
 
 
 def schedules():
@@ -59,7 +59,5 @@ def schedules():
             celula = itemCelula.find('a')
             print(celula.text)
     '''
-    return jsonify({
-        "code": 501,
-        "error": "Nao Implementado"
-    })
+    abort(501, description='Nao Implementado')
+    return
