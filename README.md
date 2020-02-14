@@ -1,13 +1,17 @@
 <p align="center">
     <img src="/imagens/logo.PNG" width="80%">
     <br></br>
-    API desenvolvida em linguagem Python para interação web com o portal online da instituição federal Centro Federal de Educação Tecnológica Celso Suckow da Fonseca (CEFET/RJ).
+    API desenvolvida em linguagem Python para interação web com o portal online da 
+    nstituição federal Centro Federal de Educação Tecnológica Celso Suckow da Fonseca (CEFET/RJ).
 </p>
 
 
 ## Sobre
 
-Application Programming Interface (API) é um conjunto de padrões de programação que permite acesso a um serviço em expecífico. Em resumo, é uma camada intermediária que promove a interação de uma aplicação com o serviço desejado, neste caso o [portal do aluno CEFET/RJ](https://alunos.cefet-rj.br/aluno/).
+Application Programming Interface (API) é um conjunto de padrões de programação que 
+permite acesso a um serviço em expecífico. Em resumo, é uma camada intermediária que 
+promove a interação de uma aplicação com o serviço desejado, neste caso o 
+[portal do aluno CEFET/RJ](https://alunos.cefet-rj.br/aluno/).
 
 <p align="center">
     <img src="/imagens/api.png" width="80%">
@@ -15,11 +19,13 @@ Application Programming Interface (API) é um conjunto de padrões de programaç
 
 ## Objetivo
 
-Este projeto tem por objetivo fomentar o desenvolvimento de aplicações que visam facilitar o acesso a informações referentes ao portal online de docentes e dicentes da instituição.
+Este projeto tem por objetivo fomentar o desenvolvimento de aplicações que visam facilitar 
+o acesso a informações referentes ao portal online de docentes e dicentes da instituição.
 
 ## Desenvolvimento
 
-Este projeto ainda está em desenvolvimento, novas funcionalidades estão sendo adicionadas constantemente. Abaixo segue o andamento das implementações:
+Este projeto ainda está em desenvolvimento, novas funcionalidades estão sendo adicionadas constantemente. 
+Abaixo segue o andamento das implementações:
 - **Autenticação**
     
     :heavy_check_mark: autenticacao   **[Atualizada** :triangular_flag_on_post: **]**
@@ -38,86 +44,48 @@ Este projeto ainda está em desenvolvimento, novas funcionalidades estão sendo 
 
 ## Utilização
 
-Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pode ser acessada através da URL: [https://api-portal-cefet.herokuapp.com/](https://api-portal-cefet.herokuapp.com/).
+Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pode ser acessada através da URL: 
+
+```url
+https://api-portal-cefet.herokuapp.com
+```
 
 ### Funções
 
 1. **Autenticação**
-    - **autenticacao (usuario , senha) [POST]**
+    - **/token/{matricula}/{senha}** _[ GET ]_
     
-        Esta função é responsável por autenticar uma nova sessão no portal. Deve seguir o padrão abaixo para sua execução:
+        Esta função é responsável por autenticar uma nova sessão no portal.
         
         URL:
-        ```url
-        https://api-portal-cefet.herokuapp.com/autenticacao
+        ```bash
+       curl -XGET 'https://api-portal-cefet.herokuapp.com/token/{matricula}/{senha}'
         ```
         
-        Json:
-        ```json
-        {
-	        "usuario" : "SUA_MATRICULA_AQUI",
-	        "senha" : "SUA_SENHA_AQUI"
-        }
-        ```
-        Se o login occorer corretamente o retorno será um json contendo um *Cookie* e uma *Matrícula* interna do site (**Atenção: a matrícula retornada não está ligada a matrícula acadêmica, se trata de um novo dado usado internamente pelo portal**).
+        Se o login occorer corretamente o retorno será um json contendo um *token* de autenticação.
     
         Exemplo de json de retorno:
         ```json
         {
-            "code": 200,
-            "data":{
-                "cookie":"B60E98A57D71D7BBEB80457A125436478",
-                "matricula":"123456"
-            }
+	        "code": 200,
+            "data": {
+                "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6Im9jdCJ9.eyJjb29raWUiOiJjb29raWUtdGVzdGUiLCJtYXRyaWN1bGEiOiIxMjM0NTY3R0NPTSJ9.gq7p3CgzqJyb_MTM30zCkI0K9dEJY4BrGV9d43l9uvw"
+            } 
         }
         ```
 
-2. **Relatórios**
+2. **Perfil**
 
-    - **listaRelatorios (cookie , matricula)**
+    - **/perfil** _[ GET ]_
     
-        Esta função é responsável por listar os relatórios disponíveis para o seu perfil. Deve seguir o padrão abaixo para sua execução:
-        ```url
-        https://api-portal-cefet.herokuapp.com/relatorios?cookie=COOKIE_AUTENTICADO_AQUI&matricula=MATRICULA_INTERNA_AQUI
+        Esta função é responsável por listar os dados principais 
+        (*Nome, Curso, Matrícula Acadêmica e Período*).
+         
+        ```bash
+        curl -XGET -H 'X-Token: {token}' 'https://api-portal-cefet.herokuapp.com/perfil'
         ```
-        Se o cookie e a matrícula forem válidos o retorno será um json contendo o código 200 e uma lista de relatórios contendo *ID*, *Nome* e *Link*.
-    
-        Exemplo de json de retorno:
-        ```json
-        {
-           "codigo": 200,
-           "data":[
-                {
-                    "id":0,
-                    "link":"atestadoTrancamento.action?matricula=123456",
-                    "nome":"Atestado Trancamento"
-                },
-                {
-                    "id":1,
-                    "link":"boletimEscolar.action?matricula=123456",
-                    "nome":"Boletim Escolar"
-                }
-           ]
-        }
-        ```
-
-    - **geraRelatorio (cookie , link)**
-    
-        Esta função é responsável por gerar um relatório expecificado pelo link (item passado pela função listaRelatorios). Deve seguir o padrão abaixo para sua execução:
-        ```url
-        https://api-portal-cefet.herokuapp.com/relatorios/pdf?cookie=COOKIE_AUTENTICADO_AQUI&link=LINK_RELATORIO_AQUI
-        ```
-        Se o cookie e o link forem válidos o retorno será um arquivo *relatorio.pdf*.
-
-3. **Perfil**
-
-    - **perfilDados (cookie , matricula)**
-    
-        Esta função é responsável por listar os dados principais (*Nome, Curso, Matrícula Acadêmica e Período*). Deve seguir o padrão abaixo para sua execução:
-        ```url
-        https://api-portal-cefet.herokuapp.com/perfil?cookie=COOKIE_AUTENTICADO_AQUI&matricula=MATRICULA_INTERNA_AQUI
-        ```
-        Se o cookie e a matrícula forem válidos o retorno será um json contendo o código 200 e uma lista de dados.
+        Se o token for válido o retorno será um json contendo 
+        o código 200 e uma lista de dados.
     
         Exemplo de json de retorno:
         
@@ -133,13 +101,17 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
         }
         ```
 
-    - **perfilDadosGerais (cookie , matricula)** *[BETA]*
+    - **/perfil/geral** _[ GET ] [BETA]_
     
-        Esta função é responsável por listar os dados cadastrados, tais como *endereço*, *número de telefone*, *E-mail* e etc. Deve seguir o padrão abaixo para sua execução:
+        Esta função é responsável por listar os dados cadastrados, 
+        tais como *endereço*, *número de telefone*, *E-mail* e etc. 
+        
         ```url
-        https://api-portal-cefet.herokuapp.com/perfil/geral?cookie=COOKIE_AUTENTICADO_AQUI&matricula=MATRICULA_INTERNA_AQUI
+        curl -XGET -H 'X-Token: {token}' 'https://api-portal-cefet.herokuapp.com/perfil/geral'
         ```
-        Se o cookie e a matrícula forem válidos o retorno será um json contendo o código 200 e uma lista de dados divididos em quadro tipos: *academico*, *informacoes*, *endereco* e *documentos*.
+        Se o token for válido o retorno será um json contendo o 
+        código 200 e uma lista de dados divididos em quadro tipos: 
+        *academico*, *informacoes*, *endereco* e *documentos*.
     
         Exemplo de json de retorno:
         
@@ -167,12 +139,54 @@ Atualmente a API está hospedada no site [Heroku](https://www.heroku.com/) e pod
         }
         ```
         
-    - **perfilFoto (cookie)**
+    - **/perfil/foto** _[ GET ]_
     
-        Esta função é responsável por obter a foto de perfil cadastrada no portal. Deve seguir o padrão abaixo para sua execução:
-        ```url
-        https://api-portal-cefet.herokuapp.com/perfil/foto?cookie=COOKIE_AUTENTICADO_AQUI
+        Esta função é responsável por obter a foto de perfil cadastrada no portal. 
+        
+        ```bash
+        curl -XGET -H 'X-Token: {token}' 'https://api-portal-cefet.herokuapp.com/perfil/foto'
         ```
-        Se o cookie for válido o retorno será um arquivo *imagemPerfil.jpeg*.
+        Se o token for válido o retorno será um arquivo *imagemPerfil.jpeg*.
 
      
+
+3. **Relatórios**
+
+    - **/relatorios** _[ GET ]_
+    
+        Esta função é responsável por listar os relatórios disponíveis para o seu perfil. 
+        
+        ```bash
+        curl -XGET -H 'X-Token: {token}' 'https://api-portal-cefet.herokuapp.com/relatorios'
+        ```
+        Se o token for válido o retorno será um json contendo o código 200
+        e uma lista de relatórios contendo *ID*, *Nome* e *Link*.
+    
+        Exemplo de json de retorno:
+        ```json
+        {
+           "codigo": 200,
+           "data":[
+                {
+                    "id":0,
+                    "link":"atestadoTrancamento.action?matricula=123456",
+                    "nome":"Atestado Trancamento"
+                },
+                {
+                    "id":1,
+                    "link":"boletimEscolar.action?matricula=123456",
+                    "nome":"Boletim Escolar"
+                }
+           ]
+        }
+        ```
+
+    - **/relatorios/{link}** _[ GET ]_
+    
+        Esta função é responsável por gerar um relatório expecificado pelo link.
+        
+        ```url
+        curl -XGET -H 'X-Token: {token}' 'https://api-portal-cefet.herokuapp.com/relatorios/{link}/pdf'
+        ```
+        Se o token for válido o retorno será um arquivo *relatorio.pdf*.
+        
