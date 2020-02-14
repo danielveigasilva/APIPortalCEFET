@@ -1,4 +1,5 @@
 from apicefet.helpers import URLS, normalizacao, Autenticado
+from itsdangerous import TimedJSONWebSignatureSerializer
 from flask import jsonify, request, send_file
 from bs4 import BeautifulSoup as bs
 from requests import Session
@@ -8,8 +9,23 @@ import io
 def reports_list():
     session = Session()
 
-    cookie = request.args.get('cookie')
-    matricula = request.args.get('matricula')
+    if 'X-Token' not in request.headers:
+        return jsonify({
+            "code": 400,
+            "error": "Insira um token"
+        })
+
+    jwt = TimedJSONWebSignatureSerializer('%key%', expires_in=10 * 60)
+    try:
+        token_data = jwt.loads(request.headers['X-Token'])
+    except:
+        return jsonify({
+            "code": 400,
+            "error": "Insira um token valido"
+        })
+
+    cookie = token_data('cookie')
+    matricula = token_data('matricula')
 
     if not Autenticado(cookie):
         return jsonify({
@@ -40,7 +56,22 @@ def reports_list():
 def reports_generate(url):
     session = Session()
 
-    cookie = request.args.get('cookie')
+    if 'X-Token' not in request.headers:
+        return jsonify({
+            "code": 400,
+            "error": "Insira um token"
+        })
+
+    jwt = TimedJSONWebSignatureSerializer('%key%', expires_in=10 * 60)
+    try:
+        token_data = jwt.loads(request.headers['X-Token'])
+    except:
+        return jsonify({
+            "code": 400,
+            "error": "Insira um token valido"
+        })
+
+    cookie = token_data('cookie')
 
     if not Autenticado(cookie):
         return jsonify({

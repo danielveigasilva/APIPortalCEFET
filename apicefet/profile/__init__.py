@@ -1,4 +1,5 @@
 from apicefet.helpers import URLS, normalizacao, Autenticado
+from itsdangerous import TimedJSONWebSignatureSerializer
 from flask import jsonify, request, send_file
 from bs4 import BeautifulSoup as bs
 from requests import Session
@@ -24,8 +25,23 @@ def get_profile_property(conteudoHTML, propriedade):
 def profile_data():  # @TODO: finalizar coleta de dados
     session = Session()
 
-    cookie = request.args.get('cookie')
-    matricula = request.args.get('matricula')
+    if 'X-Token' not in request.headers:
+        return jsonify({
+            "code": 400,
+            "error": "Insira um token"
+        })
+
+    jwt = TimedJSONWebSignatureSerializer('%key%', expires_in=10 * 60)
+    try:
+        token_data = jwt.loads(request.headers['X-Token'])
+    except:
+        return jsonify({
+            "code": 400,
+            "error": "Insira um token valido"
+        })
+
+    cookie = token_data('cookie')
+    matricula = token_data('matricula')
 
     if not Autenticado(cookie):
         return jsonify({
@@ -53,8 +69,23 @@ def profile_data():  # @TODO: finalizar coleta de dados
 def profile_data_all():  # TODO: finalizar coleta de dados
     session = Session()
 
-    cookie = request.args.get('cookie')
-    matricula = request.args.get('matricula')
+    if 'X-Token' not in request.headers:
+        return jsonify({
+            "code": 400,
+            "error": "Insira um token"
+        })
+
+    jwt = TimedJSONWebSignatureSerializer('%key%', expires_in=10 * 60)
+    try:
+        token_data = jwt.loads(request.headers['X-Token'])
+    except:
+        return jsonify({
+            "code": 400,
+            "error": "Insira um token valido"
+        })
+
+    cookie = token_data('cookie')
+    matricula = token_data('matricula')
 
     if not Autenticado(cookie):
         return jsonify({
@@ -119,7 +150,22 @@ def profile_data_all():  # TODO: finalizar coleta de dados
 def profile_photo():
     session = Session()
 
-    cookie = request.args.get('cookie')
+    if 'X-Token' not in request.headers:
+        return jsonify({
+            "code": 400,
+            "error": "Insira um token"
+        })
+
+    jwt = TimedJSONWebSignatureSerializer('%key%', expires_in=10 * 60)
+    try:
+        token_data = jwt.loads(request.headers['X-Token'])
+    except:
+        return jsonify({
+            "code": 400,
+            "error": "Insira um token valido"
+        })
+
+    cookie = token_data('cookie')
 
     if not Autenticado(cookie):
         return jsonify({
