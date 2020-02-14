@@ -59,7 +59,7 @@ https://api-portal-cefet.herokuapp.com
         
         URL:
         ```bash
-       curl -XGET 'https://api-portal-cefet.herokuapp.com/token/{matricula}/{senha}'
+       curl -XPOST -H "Content-type: application/json" -d '{"usuario" : "%matricula%",  "senha" : "%senha%"}' 'https://api-portal-cefet.herokuapp.com/auth'
         ```
         
         Se o login occorer corretamente o retorno será um json contendo um *token* de autenticação.
