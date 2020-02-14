@@ -1,4 +1,12 @@
-from flask import Flask
+from flask import Flask, jsonify
+from werkzeug.exceptions import HTTPException
+
+
+def http_exception_handler(error):
+    return jsonify({
+        "code": error.code,
+        "error": error.description
+    })
 
 
 def create_app():
@@ -17,5 +25,7 @@ def create_app():
         app.register_blueprint(profile_bp, url_prefix='/perfil')
         app.register_blueprint(reports_bp, url_prefix='/relatorios')
         app.register_blueprint(schedule_bp, url_prefix='/horarios')
+
+        app.register_error_handler(HTTPException, http_exception_handler)
 
     return app
