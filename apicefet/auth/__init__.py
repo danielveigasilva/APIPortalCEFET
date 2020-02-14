@@ -1,3 +1,4 @@
+from itsdangerous import TimedJSONWebSignatureSerializer
 from bs4 import BeautifulSoup as bs
 from apicefet.helpers import URLS
 from requests import Session
@@ -17,10 +18,15 @@ def auth(user, passwd):
     matricula = site_post_bs.find("input", id="matricula")["value"]
     cookie = session.cookies.get_dict()
 
+    jwt = TimedJSONWebSignatureSerializer('%key%', expires_in=10 * 60)
+    token = jwt.dumps({
+        "matricula": matricula,
+        "cookie": cookie['JSESSIONID']
+    }).decode("utf-8")
+
     return jsonify({
         "code": 200,
         "data": {
-            "matricula": matricula,
-            "cookie": cookie['JSESSIONID']
+            "token": token
         }
     })
