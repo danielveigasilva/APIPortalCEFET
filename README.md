@@ -56,10 +56,18 @@ https://api-portal-cefet.herokuapp.com
     - **/token/{matricula}/{senha}** _[ GET ]_
     
         Esta função é responsável por autenticar uma nova sessão no portal.
+        O conteudo da sessão devera ser um json contendo a matricula e a senha
+        no seguinte formato:
         
-        URL:
+        ```json
+        {
+          "usuario" : "%MATRICULA%",
+          "senha" : "%SENHA%"
+        }
+        ```
+        
         ```bash
-       curl -XPOST -H "Content-type: application/json" -d '{"usuario" : "%matricula%",  "senha" : "%senha%"}' 'https://api-portal-cefet.herokuapp.com/auth'
+       curl -XPOST -H "Content-type: application/json" -d '{"usuario" : "%MATRICULA%",  "senha" : "%SENHA%"}' 'https://api-portal-cefet.herokuapp.com/auth'
         ```
         
         Se o login occorer corretamente o retorno será um json contendo um *token* de autenticação.
